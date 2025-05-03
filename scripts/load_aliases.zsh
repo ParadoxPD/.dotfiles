@@ -107,9 +107,18 @@ function tn(){
     echo "you fucked up......"
   fi
 }
-alias tl="tmux ls"
+function tl(){
+  local _session_name=$(tmux ls | fzf | sed 's/:.*//')
+ if [ ! -z "$_session_name" ]
+  then
+  tn "$_session_name"
+  else
+    echo "why you do this? huh ??"
+  fi
+
+}
 function t(){
-  local out_dir="$(fd . ~/Documents ~/Desktop ~/Documents/Projects --type=d --hidden --exclude .git --max-depth 3 | sort | uniq | fzf --preview 'eza --tree --level=4 --color=always {} | head -200')"  
+  local out_dir="$(fd . ~/Documents ~/Desktop ~/Documents/Projects ~/ ~/.dev/config --type=d --hidden --exclude .git --max-depth 3 | sort | uniq | fzf --preview 'eza --tree --level=4 --color=always {} | head -200')"  
   if [ ! -z "$out_dir" ]
   then
     local curr_dir=$(pwd)

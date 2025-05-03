@@ -1,0 +1,5 @@
+modmap:
+  - name: Fuck CapsLock # Optional
+    remap:
+      CapsLock: Esc
+      Esc: CapsLock
