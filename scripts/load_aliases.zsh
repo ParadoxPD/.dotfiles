@@ -183,3 +183,14 @@ function p(){
 function k(){
   showmekey.sh
 }
+
+
+
+#fuckall aliases because I cant type
+alias clea=clear
+alias lclea=clear
+alias lcear=clear
+alias lcea=clear
+alias rclea=clear
+alias rclear=clear
+
