@@ -1,0 +1,11 @@
+[Unit]
+Description=Ghostty
+After=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=com.mitchellh.ghostty
+ExecStart=/home/paradox/.dev/bin/ghostty --launched-from=systemd
+
+[Install]
+WantedBy=graphical-session.target

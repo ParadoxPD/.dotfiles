@@ -42,14 +42,14 @@
 # # Just for example:
 # resize-overlay-duration = 4s 200ms
 
-font-family = "ComicShannsMono Nerd Font Mono"
-font-size = 10
-theme = "tokyonight-storm"
-background-opacity = 0.6
-background-blur = true
-gtk-titlebar = false
-shell-integration = zsh
-shell-integration-features = no-cursor,no-sudo,title
-cursor-style = block
-cursor-style-blink = false
+ font-family = "ComicShannsMono Nerd Font Mono"
+ font-size = 10
+ theme = "tokyonight-storm"
+ background-opacity = 0.6
+ background-blur = true
+ gtk-titlebar = false
+ shell-integration = zsh
+ shell-integration-features = no-cursor,no-sudo,title
+ cursor-style = block
+ cursor-style-blink = false
 

@@ -1,10 +1,8 @@
 # some aliases
 alias zshconfig="~/.zshrc"
 #SCARY!!!!
-alias sudo='sudo '
-alias apt='dnf'
-alias sysupdate='dnf update'
 alias cd='z'
+#alias cdold='cd'
 alias cat='bat'
 alias grep='rg'
 alias fk='thefuck'
@@ -108,7 +106,7 @@ function tn(){
   fi
 }
 function tl(){
-  local _session_name=$(tmux ls | fzf | sed 's/:.*//')
+  local _session_name=$(tmux ls | fzf --height=10 --border --reverse --ansi | sed 's/:.*//')
  if [ ! -z "$_session_name" ]
   then
   tn "$_session_name"
@@ -184,6 +182,26 @@ function k(){
   showmekey.sh
 }
 
+#Qol????
+function dnff(){
+  local pkg_list=$(dnf repoquery --available --qf '%{name} - %{summary}\n')
+  local selected_pkgs="$(echo $pkg_list | fzf --multi --preview='dnf info $(echo {} | sed "s/ - .*//")' --preview-window=down:75% | sed 's/ - .*//')"
+  if [ -n "$selected_pkgs" ]; then
+    echo "Selected packages:"
+    echo "$selected_pkgs"
+    echo -n "Proceed to install? [y/N]: "
+    read confirm
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+      echo "$selected_pkgs" | xargs sudo dnf install
+    fi
+  else
+    echo "you fucked up"
+  fi
+
+}
+
+alias ..='cd ..'
+alias ...='cd ../..'
 
 
 #fuckall aliases because I cant type
@@ -193,4 +211,5 @@ alias lcear=clear
 alias lcea=clear
 alias rclea=clear
 alias rclear=clear
+alias cls=clear
 
