@@ -1,0 +1,7 @@
+{
+  "defaults": {
+    "windows": 3,
+    "commands": ["nvim ."]
+  },
+  "projects": {}
+}
