@@ -1,15 +1,12 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
 
 #Aliases and functions for tmux
 alias tmux="tmux -f $TMUX_CONF_FILE"
 alias ts='tn sesh'
 
 config_file="${TMUX_CONF_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}}/.tmux.sessionizer.json"
-local local_config_file="$(pwd)/.tmux.sessionizer.json"
-local config=""
-if [[ -f "$local_config_file" ]]; then
-    config=$(<"$local_config_file")
-elif [[ -f "$config_file" ]]; then
+config=""
+if [[ -f "$config_file" ]]; then
     config=$(<"$config_file")
 else
     config='{"defaults": {"windows": 3, "commands": [], "search_dirs" : ["~/Documents", "~/Desktop" ,"~/"] } }'
@@ -23,6 +20,11 @@ function sanity_check() {
 
     if ! command -v fzf &>/dev/null; then
         echo "fzf is not installed. Please install it first."
+        exit 1
+    fi
+    
+    if ! command -v jq &>/dev/null; then
+        echo "jq is not installed. Please install it first."
         exit 1
     fi
 }
@@ -70,6 +72,12 @@ function tn() {
         return 1
     fi
 
+    local local_config_file="$(pwd)/.tmux.sessionizer.json"
+    if [[ -f "$local_config_file" ]]; then
+        config=$(<"$local_config_file")
+    fi
+
+
 
     # Determine template source
     local config_key="${template:-defaults}"
@@ -77,7 +85,10 @@ function tn() {
     # Determine number of windows
     local num_windows="$win_override"
     if [ -z "$num_windows" ] || ! [[ "$num_windows" =~ ^[0-9]+$ ]]; then
-        num_windows=$(jq -r --arg key "$config_key" '.[$key].windows // 3' <<<"$config")
+        num_windows=$(jq -r --arg key "$config_key" '
+            if .[$key].windows then .[$key].windows
+            else .defaults.windows end // 3
+        ' <<<"$config")
     fi
 
     # Get commands
@@ -87,8 +98,12 @@ function tn() {
     else
         while read -r cmd; do
             commands+=("$cmd")
-        done < <(jq -r --arg key "$config_key" '.[$key].commands[]?' <<<"$config")
+        done < <(jq -r --arg key "$config_key" '
+            if .[$key].commands then .[$key].commands[]
+            else .defaults.commands[] end
+        ' <<<"$config")
     fi
+
 
     # Create session if not exists
     if ! tmux has-session -t "$session" 2>/dev/null; then
@@ -104,9 +119,9 @@ function tn() {
     fi
 
     if [ -n "$TMUX" ]; then
-        tmux switch-client -t "$session"
+        tmux switch-client -t "$session:1"
     else
-        tmux attach-session -t "$session"
+        tmux attach-session -t "$session:1"
     fi
 }
 
@@ -120,6 +135,7 @@ function tl() {
     fi
 
 }
+
 function tk() {
     sanity_check
     local _session_name=$(tmux ls | fzf --height=10 --border --reverse --ansi | sed 's/:.*//')
@@ -132,8 +148,26 @@ function tk() {
 }
 
 function t() {
+    local template=""
+    local all_args=("$@")
+    while [[ "$#" -gt 0 ]]; do
+        case "$1" in
+        -t|--template)
+            template="$2"
+            break
+            ;;
+        *)
+            shift
+            ;;
+        esac
+    done
+
+    local config_key="${template:-defaults}"
     local search_dirs=()
-    local search_dirs=($(jq -r '.defaults.search_dirs[]?' <<<"$config"))
+    local search_dirs=($(jq -r --arg key "$config_key" '
+      if .[$key].search_dirs then .[$key].search_dirs[]
+      else .defaults.search_dirs[] end
+    ' <<<"$config"))
 
     # Fallback if empty
     if [[ ${#search_dirs[@]} -eq 0 ]]; then
@@ -164,7 +198,7 @@ function t() {
         cd $out_dir
         local tmux_session_name=$(basename $out_dir)
         tmux_session_name="${tmux_session_name//./_}"
-        tn $tmux_session_name "$@"
+        tn $tmux_session_name "${all_args[@]}"
         cd "$curr_dir"
     else
         echo "you fucked up"
