@@ -4,7 +4,31 @@
 alias tmux="tmux -f $TMUX_CONF_FILE"
 alias ts='tn sesh'
 
+config_file="${TMUX_CONF_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}}/.tmux.sessionizer.json"
+local local_config_file="$(pwd)/.tmux.sessionizer.json"
+local config=""
+if [[ -f "$local_config_file" ]]; then
+    config=$(<"$local_config_file")
+elif [[ -f "$config_file" ]]; then
+    config=$(<"$config_file")
+else
+    config='{"defaults": {"windows": 3, "commands": [], "search_dirs" : ["~/Documents", "~/Desktop" ,"~/"] } }'
+fi
+
+function sanity_check() {
+    if ! command -v tmux &>/dev/null; then
+        echo "tmux is not installed. Please install it first."
+        exit 1
+    fi
+
+    if ! command -v fzf &>/dev/null; then
+        echo "fzf is not installed. Please install it first."
+        exit 1
+    fi
+}
+
 function ta() {
+    sanity_check
     if [ "$#" -eq 1 ]; then
         tmux attach-session -t $1
     elif [ "$#" -eq 0 ]; then
@@ -14,6 +38,7 @@ function ta() {
 }
 
 function tn() {
+    sanity_check
     local session=""
     local win_override=""
     local template=""
@@ -45,16 +70,6 @@ function tn() {
         return 1
     fi
 
-    local config_file="$TMUX_CONF_DIR/.tmux.sessionizer.json"
-    local local_config_file="$(pwd)/.tmux.sessionizer.json"
-    local config=""
-    if [[ -f "$local_config_file" ]]; then
-        config=$(<"$local_config_file")
-    elif [[ -f "$config_file" ]]; then
-        config=$(<"$config_file")
-    else
-        config='{"defaults": {"windows": 3, "commands": []}}'
-    fi
 
     # Determine template source
     local config_key="${template:-defaults}"
@@ -83,17 +98,9 @@ function tn() {
         done
 
         # Send commands to windows
-        if [ -n "$BASH_VERSION" ]; then
-            for ((i = 1; i < ${#commands[@]}; i++)); do
-                tmux send-keys -t "$session:$((i + 1))" "${commands[$i]}" C-m
-            done
-        else
-            i=1
-            for cmd in "${commands[@]}"; do
-                tmux send-keys -t "$session:$i" "$cmd" C-m
-                ((i++))
-            done
-        fi
+        for ((i = 1; i <= ${#commands[@]}; i++)); do
+            tmux send-keys -t "$session:$i" "${commands[$i]}" C-m
+        done
     fi
 
     if [ -n "$TMUX" ]; then
@@ -104,6 +111,7 @@ function tn() {
 }
 
 function tl() {
+    sanity_check
     local _session_name=$(tmux ls | fzf --height=10 --border --reverse --ansi | sed 's/:.*//')
     if [ ! -z "$_session_name" ]; then
         tn "$_session_name" "$@"
@@ -113,6 +121,7 @@ function tl() {
 
 }
 function tk() {
+    sanity_check
     local _session_name=$(tmux ls | fzf --height=10 --border --reverse --ansi | sed 's/:.*//')
     if [ ! -z "$_session_name" ]; then
         tmux kill-session -t "$_session_name"
@@ -121,8 +130,35 @@ function tk() {
     fi
 
 }
+
 function t() {
-    local out_dir="$(fd . ~/Documents ~/Desktop ~/Documents/Projects ~/ ~/.dev/config --type=d --hidden --exclude .git --max-depth 3 | sort | uniq | fzf --preview 'eza --tree --level=4 --color=always {} | head -200')"
+    local search_dirs=()
+    local search_dirs=($(jq -r '.defaults.search_dirs[]?' <<<"$config"))
+
+    # Fallback if empty
+    if [[ ${#search_dirs[@]} -eq 0 ]]; then
+        echo "Add search_dirs to the config"
+        search_dirs=(~/Documents ~/Desktop ~/)
+    fi
+
+
+    # Expand ~ manually
+    for ((i = 1; i <= ${#search_dirs[@]}; i++)); do
+        search_dirs[$i]="${search_dirs[$i]/\~/$HOME}"
+    done
+
+
+    # Build fd arguments
+    local fd_args=()
+    for dir in "${search_dirs[@]}"; do
+        fd_args+=("$dir")
+    done
+
+    local out_dir
+    out_dir="$(fd . "${fd_args[@]}" --type=d --hidden --exclude .git --max-depth 3 \
+        | sort | uniq \
+        | fzf --preview 'eza --tree --level=4 --color=always {} | head -200')"
+    
     if [ ! -z "$out_dir" ]; then
         local curr_dir=$(pwd)
         cd $out_dir
@@ -130,7 +166,6 @@ function t() {
         tmux_session_name="${tmux_session_name//./_}"
         tn $tmux_session_name "$@"
         cd "$curr_dir"
-
     else
         echo "you fucked up"
     fi
