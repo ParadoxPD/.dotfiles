@@ -1,7 +1,1 @@
-{
-  "defaults": {
-    "windows": 3,
-    "commands": ["nvim ."]
-  },
-  "projects": {}
-}
+/home/paradox/Documents/Projects/tmux-sessionizer/.tmux.sessionizer.json
