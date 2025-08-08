@@ -28,3 +28,6 @@ unset rc
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 . "$HOME/.cargo/env"
+if [[ -f "$HOME/.cache/wal/sequences" ]]; then
+    (cat $HOME/.cache/wal/sequences)
+fi
