@@ -1,5 +1,42 @@
+# === ZSH Startup + Prompt Profiler (logging version) ===
+ZSH_PROFILE_LOG="$HOME/.zsh_profile_log"
+
+# Reset log at each shell start
+: > "$ZSH_PROFILE_LOG"
+
+
+# Start timer *before* the prompt is drawn
+prompt_timer_precmd() {
+  _prompt_start=$(date +%s%N)
+}
+
+# Stop timer *right after* prompt drawing finishes
+prompt_timer_ps1() {
+  local end=$(date +%s%N)
+  local elapsed_ms=$(( (end - _prompt_start) / 1000000 ))
+  printf "\n\n\n%6d ms  prompt render\n" "$elapsed_ms" >> "$ZSH_PROFILE_LOG"
+}
+
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd prompt_timer_precmd   # fires before prompt is built
+add-zsh-hook preexec prompt_timer_ps1     # fires after prompt is drawn
+
+_zsh_prof_start=$(date +%s%N)
+_zsh_prof_last=$_zsh_prof_start
+
+_prof() {
+  local now=$(date +%s%N)
+  local elapsed_ms=$(( (now - _zsh_prof_last) / 1000000 ))
+  printf "%6d ms  %s\n" "$elapsed_ms" "$1" >> "$ZSH_PROFILE_LOG"
+  _zsh_prof_last=$now
+}
+
+_prof "Start of .zshrc"
+zmodload zsh/zprof
+
 #Source the environment variables
 source ~/.dev/scripts/load_env.sh
+_prof "Loaded env from .dev"
 
 ZSH_THEME="robbyrussell"
 
@@ -7,7 +44,10 @@ plugins=(
 	git
 	zsh-autosuggestions
 )
+
 source $ZSH/oh-my-zsh.sh
+_prof "Sourced oh my zsh"
+#source ~/.zsh_prompt_profiler.zsh
 
 # History configurations
 HISTFILE=~/.zsh_history
@@ -23,6 +63,7 @@ setopt hist_verify            # show command with history expansion to user befo
 
 #load aliases and functions
 source ~/.dev/scripts/load_aliases.zsh
+_prof "Sourced aliases"
 
 # enable auto-suggestions based on the history
 if [ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
@@ -38,6 +79,8 @@ fi
 
 source /home/paradox/.dev/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source /home/paradox/.dev/zsh/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+_prof "Sourced plugins"
+
 
 eval "$(zoxide init zsh)"
 eval "$(thefuck --alias)"
@@ -57,7 +100,7 @@ _fzf_compgen_path() {
 
 # Use fd to generate the list for directory completion
 _fzf_compgen_dir() {
-  fd --type=d --hidden --exclude .git . "$1"
+  fd --type=d --hidden --exclude .
 }
 
 show_file_or_dir_preview="if [ -d {} ]; then eza --tree --color=always {} | head -200; else bat -n --color=always --line-range :500 {}; fi"
@@ -80,13 +123,23 @@ _fzf_comprun() {
 }
 
 export PATH="$PATH:$DEVSRC/bin:$DEVSRC/neovim/bin:$DEVSRC/go/bin:$DEVSRC/zig:$DEVSRC/node/bin:$DEVSRC/rust/.cargo/bin:$DEVSRC/php/herd-lite/bin:$HOME/.local/bin:$FLUTTER_SRC:$ANDROID_SDK_ROOT:$ANDROID_PLATFORM_TOOLS:$ANDROID_CMDLINE_TOOLS:$ANDROID_EMULATOR_ROOT:$HOME/go/bin:$DEVSRC/scripts"
+_prof "Set path"
 
 
 source "$DEVSRC/rust/.cargo/env"
+_prof "Sourced cargo env"
+
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 [[ -s "$DEVSRC/.sdkman/bin/sdkman-init.sh" ]] && source "$DEVSRC/.sdkman/bin/sdkman-init.sh"
+_prof "Sourced sdkman"
 
 
 [[ ! -r '/home/paradox/.dev/.opam/opam-init/init.zsh' ]] || source '/home/paradox/.dev/.opam/opam-init/init.zsh' > /dev/null 2> /dev/null
+_prof "Sourced opam"
+
+
+# End of file
+_prof "End of .zshrc"
+zprof >> "$ZSH_PROFILE_LOG" 
 
