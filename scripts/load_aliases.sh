@@ -1,5 +1,7 @@
 # some aliases
 alias zshconfig="~/.zshrc"
+alias bashconfig="~/.bashrc"
+
 #SCARY!!!!
 alias cd='z'
 #alias cdold='cd'
@@ -17,114 +19,109 @@ alias lt='eza --tree --icons --color=always'
 alias l='eza -la --icons --color=always'
 
 #Aliases and functions for fzf
-function f(){
-  local out_dir="$(fd --type=d --hidden --strip-cwd-prefix --exclude .git --max-depth 4 | fzf --preview 'eza --tree --level=4 --color=always {} | head -200')"
+function f() {
+  local out_dir
+  out_dir="$(fd --type=d --hidden --strip-cwd-prefix --exclude .git --max-depth 4 | fzf --preview 'eza --tree --level=4 --color=always {} | head -200')"
 
-  if [ ! -z "$out_dir" ]
-  then
-    nvim $out_dir
+  if [[ -n "$out_dir" ]]; then
+    nvim "$out_dir"
   else
     echo "you fucked up"
   fi
 }
 
-function ff(){
-  local out_file="$(fd --type=f --hidden --strip-cwd-prefix --exclude .git | fzf --preview 'bat -n --color=always --line-range :500 {}')"
+function ff() {
+  local out_file
+  out_file="$(fd --type=f --hidden --strip-cwd-prefix --exclude .git | fzf --preview 'bat -n --color=always --line-range :500 {}')"
 
-  if [ ! -z "$out_file" ]
-  then
-    nvim $out_file
+  if [[ -n "$out_file" ]]; then
+    nvim "$out_file"
   else
     echo "you fucked up"
   fi
 
 }
-
 
 #Aliases and functions for vim and code
 alias vi="nvim"
 alias vim="nvim"
-function +(){ 
-  if [ "$#" -eq 0 ]
-  then
+function +() {
+  if [ "$#" -eq 0 ]; then
     nvim .
   else
-    nvim $1
+    nvim "$1"
   fi
 }
 
-function +c(){
- if [ "$#" -eq 0 ]
-  then
+function +c() {
+  if [ "$#" -eq 0 ]; then
     code .
   else
-    code $1
+    code "$1"
   fi
 
 }
 
-source $DEVSRC/scripts/tmux.sessionizer.sh
+source "$DEVSRC/scripts/tmux.sessionizer.sh"
 
 #Aliases and functions for git
 alias gs='git status'
 alias gd='git diff'
-function push(){
-  if [ "$#" -eq 2 ]
-  then
+function push() {
+  if [ "$#" -eq 2 ]; then
     git add .
-    git commit -m $2
-    git push origin $1
+    git commit -m "$2"
+    git push origin "$1"
   else
     echo "Wrong Arguments Bi7ch......."
   fi
 
 }
 
-function wip(){
-  if [ "$#" -eq 1 ]
-  then
+function wip() {
+  if [ "$#" -eq 1 ]; then
     git add .
     git commit -m "Bug Fixes and Refactoring"
-    git push origin $1
-  elif [ "$#" -eq 0 ] 
-  then
+    git push origin "$1"
+  elif [ "$#" -eq 0 ]; then
     git add .
     git commit -m "Bug Fixes and Refactoring"
     git push origin main
-  else 
+  else
     echo "Wrong Arguments Bi7ch........."
   fi
 
 }
 
-function lpush(){
-  if [ "$#" -eq 1 ]
-  then
+function lpush() {
+  if [ "$#" -eq 1 ]; then
     git add .
-    git commit -m $1
+    git commit -m "$1"
   else
     echo "Wrong Arguments Bi7ch......."
   fi
 
 }
 
-function p(){
+function p() {
   project_create.sh "$@"
 }
 
-function k(){
+function k() {
   showmekey.sh
 }
 
 #Qol????
-function dnff(){
-  local pkg_list=$(dnf repoquery --available --qf '%{name} - %{summary}\n')
-  local selected_pkgs="$(echo $pkg_list | fzf --multi --preview='dnf info $(echo {} | sed "s/ - .*//")' --preview-window=down:75% | sed 's/ - .*//')"
+function dnff() {
+  local pkg_list
+  local selected_pkgs
+  pkg_list=$(dnf repoquery --available --qf '%{name} - %{summary}\n')
+  selected_pkgs="$(echo $pkg_list | fzf --multi --preview='dnf info $(echo {} | sed "s/ - .*//")' --preview-window=down:75% | sed 's/ - .*//')"
   if [ -n "$selected_pkgs" ]; then
     echo "Selected packages:"
     echo "$selected_pkgs"
     echo -n "Proceed to install? [y/N]: "
-    read confirm
+    read -r confirm
     if [[ "$confirm" =~ ^[Yy]$ ]]; then
       echo "$selected_pkgs" | xargs sudo dnf install
     fi
@@ -137,7 +134,6 @@ function dnff(){
 alias ..='cd ..'
 alias ...='cd ../..'
 
-
 #fuckall aliases because I cant type
 alias clea=clear
 alias lclea=clear
@@ -146,7 +142,6 @@ alias lcea=clear
 alias rclea=clear
 alias rclear=clear
 alias cls=clear
-
 
 #tts stuff
 function matushka() {
