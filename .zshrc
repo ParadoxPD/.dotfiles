@@ -62,7 +62,7 @@ setopt hist_verify            # show command with history expansion to user befo
 
 
 #load aliases and functions
-source ~/.dev/scripts/load_aliases.zsh
+source ~/.dev/scripts/load_aliases.sh
 _prof "Sourced aliases"
 
 # enable auto-suggestions based on the history
