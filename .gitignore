@@ -30,4 +30,5 @@
 /config/balenaEtcher
 /config/.android
 /config/go
+/config/ngrok
 
