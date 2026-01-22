@@ -1,0 +1,99 @@
+;; eww.yuck - Main configuration file
+
+;; ===== VARIABLES =====
+(defpoll time :interval "1s"
+  `date '+%H:%M:%S'`)
+
+(defpoll date :interval "60s"
+  `date '+%A, %B %d, %Y'`)
+
+(defpoll weather :interval "600s"
+  `bash ~/.config/eww/scripts/weather.sh`)
+
+(defpoll music_status :interval "1s"
+  `bash ~/.config/eww/scripts/music.sh status`)
+
+(defpoll music_title :interval "1s"
+  `bash ~/.config/eww/scripts/music.sh title`)
+
+(defpoll music_artist :interval "1s"
+  `bash ~/.config/eww/scripts/music.sh artist`)
+
+;; ===== DATETIME WIDGET =====
+(defwidget datetime []
+  (box :class "datetime-widget"
+       :orientation "v"
+       :space-evenly false
+       :spacing 10
+    (label :class "time" :text time)
+    (label :class "date" :text date)))
+
+;; ===== WEATHER WIDGET =====
+(defwidget weather []
+  (box :class "weather-widget"
+       :orientation "v"
+       :space-evenly false
+       :spacing 10
+    (box :orientation "h"
+         :space-evenly false
+         :spacing 15
+      (label :class "weather-icon" 
+             :text {weather != "" ? (weather =~ "Clear" ? "☀️" :
+                                     weather =~ "Cloud" ? "☁️" :
+                                     weather =~ "Rain" ? "🌧️" :
+                                     weather =~ "Snow" ? "❄️" :
+                                     weather =~ "Thunder" ? "⛈️" : "🌡️") : "..."})
+      (box :orientation "v"
+           :space-evenly false
+        (label :class "weather-temp" :text {weather != "" ? weather : "Loading..."})
+        (label :class "weather-desc" :text {weather != "" ? 
+          (weather =~ "Clear" ? "Beautiful day ahead!" :
+           weather =~ "Cloud" ? "A perfect day for reflection" :
+           weather =~ "Rain" ? "Let the rain wash away worries" :
+           weather =~ "Snow" ? "Every snowflake is unique, like you" :
+           weather =~ "Thunder" ? "After the storm comes clarity" :
+           "Stay present, stay mindful") : ""})))))
+
+;; ===== MUSIC WIDGET =====
+(defwidget music []
+  (box :class "music-widget"
+       :orientation "v"
+       :space-evenly false
+       :spacing 8
+    (label :class "music-title" 
+           :text {music_title != "" ? music_title : "No music playing"}
+           :limit-width 30
+           :wrap false)
+    (label :class "music-artist" 
+           :text {music_artist != "" ? music_artist : ""}
+           :limit-width 30
+           :wrap false)
+    (box :orientation "h"
+         :space-evenly true
+         :spacing 10
+         :halign "center"
+      (button :class "music-btn" 
+              :onclick "bash ~/.config/eww/scripts/music.sh prev" "⏮")
+      (button :class "music-btn" 
+              :onclick "bash ~/.config/eww/scripts/music.sh toggle" 
+              {music_status == "Playing" ? "⏸" : "▶"})
+      (button :class "music-btn" 
+              :onclick "bash ~/.config/eww/scripts/music.sh next" "⏭"))))
+
+;; ===== MAIN WINDOW =====
+(defwindow widgets
+  :monitor 0
+  :geometry (geometry :x "20px"
+                      :y "20px"
+                      :width "300px"
+                      :height "400px")
+  :stacking "fg"
+  :windowtype "normal"
+  :wm-ignore false
+  (box :class "main-container"
+       :orientation "v"
+       :space-evenly false
+       :spacing 15
+    (datetime)
+    (weather)
+    (music)))

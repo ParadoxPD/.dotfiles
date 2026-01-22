@@ -122,6 +122,7 @@ _fzf_comprun() {
   esac
 }
 
+
 export PATH="$PATH:$DEVSRC/bin:$DEVSRC/neovim/bin:$DEVSRC/go/bin:$DEVSRC/zig:$DEVSRC/node/bin:$DEVSRC/rust/.cargo/bin:$DEVSRC/php/herd-lite/bin:$HOME/.local/bin:$FLUTTER_SRC:$ANDROID_SDK_ROOT:$ANDROID_PLATFORM_TOOLS:$ANDROID_CMDLINE_TOOLS:$ANDROID_EMULATOR_ROOT:$HOME/go/bin:$DEVSRC/scripts"
 _prof "Set path"
 
@@ -143,3 +144,7 @@ _prof "Sourced opam"
 _prof "End of .zshrc"
 zprof >> "$ZSH_PROFILE_LOG" 
 
+
+
+# opencode
+export PATH=/home/paradox/.opencode/bin:$PATH

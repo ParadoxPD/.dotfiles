@@ -42,7 +42,7 @@ run_tailscale() {
         EXIT_IP=$(echo "$SELECTION" | awk '{print $2}')
 
         echo "Connecting to exit node: $SELECTION"
-        sudo tailscale up --exit-node="$EXIT_IP" "$@"
+        sudo tailscale up --exit-node="$EXIT_IP" --accept-dns=false  --exit-node-allow-lan-access "$@"
         ;;
 
     disconnect)

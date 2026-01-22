@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+pkill qpwgraph
+systemctl --user stop pipewire wireplumber pipewire-pulse
+rm -rf ~/.cache/pipewire
+systemctl --user start wireplumber pipewire pipewire-pulse
+
