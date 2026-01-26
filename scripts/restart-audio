@@ -1,7 +1,34 @@
 #!/usr/bin/env bash
-
 pkill qpwgraph
-systemctl --user stop pipewire wireplumber pipewire-pulse
+systemctl --user stop wireplumber.service
+systemctl --user stop pipewire.socket pipewire-pulse.socket
+sleep 1
+pkill -9 pipewire 2>/dev/null
+pkill -9 pipewire-pulse 2>/dev/null
+pkill -9 wireplumber 2>/dev/null
 rm -rf ~/.cache/pipewire
-systemctl --user start wireplumber pipewire pipewire-pulse
+rm -rf ~/.local/state/wireplumber
+rm -rf ~/.local/state/pipewire
+systemctl --user daemon-reload
+sleep 2
+systemctl --user start pipewire.socket pipewire-pulse.socket
+pactl set-default-sink sink_desktop
+pactl set-default-source sink_virtual_mic.monitor
 
+sleep 1
+#systemctl --user start pipewire pipewire-pulse
+sleep 1
+systemctl --user start wireplumber.service
+sleep 2
+echo "Audio system restarted. Checking status..."
+systemctl --user status wireplumber --no-pager -l
+
+sleep 1
+# Check if devices are created
+pw-cli list-objects | grep -A5 "node.name"
+
+# Check priorities
+wpctl status
+
+# See default devices
+pactl info

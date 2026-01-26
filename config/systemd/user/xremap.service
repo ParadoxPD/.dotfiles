@@ -1,0 +1,14 @@
+[Unit]
+Description=Xremap daemon
+After=graphical.target
+
+[Service]
+ExecStart=/usr/bin/xremap /home/paradox/.dev/config/xremap/config.yml --watch
+Restart=always
+RestartSec=2
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/paradox/.Xauthority
+User=paradox
+
+[Install]
+WantedBy=default.target

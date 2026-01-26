@@ -12,8 +12,8 @@ function tn_special() {
         else
             tmux new-session -A -ds "$session"
             tmux new-window -dt "$session":
-            tmux send-keys -t "$session":1 'sudo xremap  ~/.dev/config/xremap/config.yml --watch' C-m
-            tmux send-keys -t "$session":2 'showmekey.sh' C-m
+            tmux send-keys -t "$session":1 'sudo xremap  /home/pardox/.dev/config/xremap/config.yml --watch' C-m
+            tmux send-keys -t "$session":2 '' C-m
             if [ -n "$TMUX" ]; then
                 tmux switch-client -t "$session"
             else
