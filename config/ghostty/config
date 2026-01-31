@@ -49,7 +49,6 @@
  background-blur = true
  gtk-titlebar = false
  shell-integration = zsh
- shell-integration-features = no-cursor,no-sudo,title
+ shell-integration-features = no-cursor,no-sudo,title,ssh-env,ssh-terminfo
  cursor-style = block
  cursor-style-blink = false
-

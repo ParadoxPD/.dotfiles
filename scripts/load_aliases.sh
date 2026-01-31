@@ -179,8 +179,9 @@ alias rclear=clear
 alias cls=clear
 
 #tts stuff
+PORT='3003'
 function matushka() {
-    curl -X POST http://localhost:8080/speak \
+    curl -X POST http://localhost:$PORT/speak \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer supersecrettoken" \
         -d "{
@@ -190,7 +191,7 @@ function matushka() {
 }
 
 function mario() {
-    curl -X POST http://localhost:8080/speak \
+    curl -X POST http://localhost:$PORT/speak \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer supersecrettoken" \
         -d "{
@@ -200,7 +201,7 @@ function mario() {
 }
 
 function scam() {
-    curl -X POST http://localhost:8080/speak \
+    curl -X POST http://localhost:$PORT/speak \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer supersecrettoken" \
         -d "{
@@ -210,7 +211,7 @@ function scam() {
 }
 
 function bmw() {
-    curl -X POST http://localhost:8080/speak \
+    curl -X POST http://localhost:$PORT/speak \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer supersecrettoken" \
         -d "{
