@@ -44,7 +44,7 @@ alias grep='rg'
 alias fk='thefuck'
 alias rmt='rmtrash'
 alias rmdt='rmdirtrash'
-alias tree='tre'
+alias tree='better-tree'
 
 #Aliases and functions for eza
 alias ls='eza -a --icons --color=always'
